@@ -36,7 +36,7 @@ typedef struct{
 
 //MR WORLD WIDES
  int knownAck = 1;
- int currSeq = 1;
+ int currSeq = 1;  //
  int connectionClient =-1;
  int serverConnection;
  int almostReady = 0;
@@ -286,6 +286,20 @@ int failSwitch(char * s_host, int sport){
 int main(int argc, char * argv[]){
     
     
+    /*
+     int knownAck = 1;
+ int currSeq = 1;  //
+ int connectionClient =-1;
+ int serverConnection;
+ int almostReady = 0;
+ int serverSocket = -1;
+ int lastMsg = -1;
+ int clientListenSocket =-1;
+ int dummy = 1;
+    
+    */
+    
+    
     int telnetConnection;
     int lport;
     int sport;
@@ -333,7 +347,7 @@ int main(int argc, char * argv[]){
                s_host = argv[2];
                sport   = atoi(argv[3]);
                
-               int lport_htons = htons(lport);
+               //int lport_htons = htons(lport);
                //printf("lport: %d \n", lport);
                //printf("%s\n", s_host);
                
@@ -349,26 +363,40 @@ int main(int argc, char * argv[]){
                }
                setsockopt(clientListenSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
                setsockopt(clientListenSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
+               //set_socket opts
+               //clientAdress.sin_port = htons();
+               int lport_htons = htons(lport);
                listenAdress.sin_port = lport_htons;
+               //156
                
-               //------156
+               //bind and listen
+           bind_ = bind(clientListenSocket, (struct sockaddr *)&listenAdress, sizeof(listenAdress));
+           listen_ = listen(clientListenSocket, 7);
+           if((bind_ < 0) || (listen_ < 0)){
+           printf("bind and listen failed\n");
+           }
+           
+           connectionClient = accept(clientListenSocket,(struct sockaddr *)&listenAdress, &len_sock);
+            if(connectionClient < 0){
+              printf("Cant create connection to client\n");
+            }  else if(connectionClient == 0){
+                //not super sure
+                printf("ConnectionClient == 0\n ");
+                } else{
+                    //NOOOOW we wanna open sproxy
+                    serverSocket = socket(PF_INET, SOCK_STREAM, 0);
+                    if(serverSocket < 1){
+                     printf("serverSocket creation failed\n");
+                    }
+                    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
+                    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
+                }
+                //connect to the server with user inputs
+                    struct hostent *specifiedHost = gethostbyname(s_host);
+                    if(!specifiedHost){
+                        printf("The Host IP is not online\n");
+                    }
                
-               //create a TCP socket for server
-               //-------SERVERSOCKET-------
-               serverSocket = socket(PF_INET, SOCK_STREAM, 0);
-               if(serverSocket < 1){
-                   printf("serverSocket creation failed\n");
-               }
-               setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
-               setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
-        
-        //printf("ServerSocket and ClientListenSocket created\n");
-        
-        //connect to the server with user inputs
-        struct hostent *specifiedHost = gethostbyname(s_host);
-        if(!specifiedHost){
-            printf("The Host IP is not online\n");
-        }
                
          bcopy(specifiedHost->h_addr, (char *)&clientAdress.sin_addr, specifiedHost->h_length);
          clientAdress.sin_port = htons(sport); //passed in as arg[3]
@@ -380,36 +408,25 @@ int main(int argc, char * argv[]){
             return -1;
            }
                                                     
-           //bind and listen
-           bind_ = bind(clientListenSocket, (struct sockaddr *)&listenAdress, sizeof(listenAdress));
-           listen_ = listen(clientListenSocket, 7);
-           if((bind_ < 0) || (listen_ < 0)){
-           printf("bind and listen failed\n");
-           }
-           printf("Ready to connect\n");
+           
+           //printf("Ready to connect\n");
                                                                                                                               
-           connectionClient = accept(clientListenSocket,(struct sockaddr *)&listenAdress, &len_sock);
-           if(connectionClient < 0){
-           printf("Cant create connection to client\n");
-           }
+           
                                          
-           //printf("Connection established\n");
+           printf("Connection established\n");
         
         //accept data and foward it
         //maxIncoming= (serverSocket < connectionClient) ? connectionClient : serverSocket;
-                  
-        gettimeofday(&lastHBsent, NULL);
-        gettimeofday(&lastHBreceived, NULL);
         //new message for connection. MOVE
         myMessage *newConn = malloc(sizeof(myMessage)); 
         newConn-> type = 3;
         newConn-> newSesh = 1;
         newConn-> lastReceivedMessage = 1;
         mySend(serverSocket, newConn);
-        
-                       
-        char *buffy = calloc(MAX_LINE, sizeof(char)); // a buffer for receiveing.
-                       
+                
+        gettimeofday(&lastHBsent, NULL);
+        gettimeofday(&lastHBreceived, NULL);
+                  
         //forever until -1
         while(1){
             struct timeval TO;  //time ouuuuuuut
