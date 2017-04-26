@@ -401,7 +401,7 @@ int main(int argc, char * argv[]){
              //WE GOT A TIMEOUT PEOPLE
             //send the server a hb
              if(cproxy > 0) {
-                printf("Timeout. Heartbeat being sent to server.\n");
+                printf("Heartbeat being sent.\n");
                 
                 gettimeofday(&lastHBsent, NULL);
                 

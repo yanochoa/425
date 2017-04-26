@@ -364,11 +364,12 @@ int main(int argc, char * argv[]){
            if((bind_ < 0) || (listen_ < 0)){
            printf("bind and listen failed\n");
            }
-           
+           printf("waiting for a client here\n");
            connectionClient = accept(clientListenSocket,(struct sockaddr *)&listenAdress, &len_sock);
             if(connectionClient < 0){
               printf("Cant create connection to client\n");
             }  else if(connectionClient == 0){
+                printf("connection client was 0 \n");
                 //not super sure
                 printf("ConnectionClient == 0 \n ");
                 } else{
@@ -377,15 +378,16 @@ int main(int argc, char * argv[]){
                     if(serverSocket < 1){
                      printf("serverSocket creation failed\n");
                     }
-                    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
-                    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
+                    
                 }
+                setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
+                setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
                 //connect to the server with user inputs
                     struct hostent *specifiedHost = gethostbyname(s_host);
                     if(!specifiedHost){
                         printf("The Host IP is not online\n");
                     }
-               
+         printf("ready to connect\n");      
                
          bcopy(specifiedHost->h_addr, (char *)&clientAdress.sin_addr, specifiedHost->h_length);
          clientAdress.sin_port = htons(sport); //passed in as arg[3]
@@ -422,7 +424,7 @@ int main(int argc, char * argv[]){
             TO.tv_usec = 0;
             TO.tv_sec = 1;
             bzero(buffer, 1024);
-            printf("while loop top\n");
+            //printf("while loop top\n");
            
             //set the options for set
             FD_ZERO(&socketIncoming);
@@ -449,7 +451,7 @@ int main(int argc, char * argv[]){
             //WE GOT A TIMEOUT PEOPLE
             //send the server a hb
              if(serverSocket > 0) {
-                printf("Timeout. Heartbeat being sent to server.\n");
+                printf("Heartbeat being sent to server.\n");
                 
                 gettimeofday(&lastHBsent, NULL);
                 
@@ -597,7 +599,7 @@ int main(int argc, char * argv[]){
             msgg-> messageSize = lengthPayload;
             msgg->payload = calloc(lengthPayload, sizeof(char));
             memcpy(msgg->payload, buffer, lengthPayload);
-            printf("could be a problem here: \n\n");
+            //printf("could be a problem here: \n\n");
             printf("what we read from the buffer: %s\n", msgg->payload);
             mySend(serverSocket, msgg);
             currSeq++;
