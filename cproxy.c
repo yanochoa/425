@@ -71,7 +71,7 @@ int byteStream(int socket, char *buff, int size, int incore) {
 void mySend(int socket, myMessage *message) {
     
     if(!message) {
-        printf*("mySend got a null message\n");
+        printf("mySend got a null message\n");
         return;
     }
     //alright, we first send a header
