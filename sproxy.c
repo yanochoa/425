@@ -1,8 +1,7 @@
 /*
  Author: Yan Ochoa (No partner)
  CSC 425
-i dont know its 10:31
- Milestone 3
+ Milestone 3 yesterday's server
  */
 
 #include <stdio.h>

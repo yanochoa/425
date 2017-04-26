@@ -2,7 +2,7 @@
 .Author: Yan Ochoa (No partner)
  CSC 425 Milestone 2
  client proxy
-  this boi is the second from last of today
+  * yesterdays
  */
 
 #include <stdio.h>
@@ -69,12 +69,9 @@ int byteStream(int socket, char *buff, int size, int incore) {
 }
 
 
-void mySend(int socket, myMessage *message) {
+void mySend(int sock, myMessage *message) {
     
-     if(!message) {
-        printf("mySend() is being asked to send a NULL msg on socket %d\n", socket);
-        return;
-    }
+    
     //alright, we first send a header
     //socket complains if ints arent unsigned so we gotta use uint32_t
     uint32_t flaggy = htonl((uint32_t) message->type);
@@ -87,7 +84,8 @@ void mySend(int socket, myMessage *message) {
     //decide whattttt youre trying to send with some ifs
 
     if(mtype == 1){ //HEARTBEAT
-        //nothing to do here
+        //no body
+        //break;
     }
     else if(mtype == 2){  //ACK NUM
         //socket doesnt like it if you dont send unsigned ints
@@ -142,22 +140,19 @@ myMessage * myRead(int socket){
     int mtype = 0;
     uint32_t mmtype;
     status = byteStream(socket, (char *) &mmtype, sizeof(uint32_t), 0);
-    mtype = ntohl(mmtype); 
-    printf("Read a message with type %d", mtype);
+    mtype = ntohl(mmtype);
+    
     if(status == 0){
-        printf("myRead failed instantly\n");
         return NULL;
     }
     if(mtype == 1){ //HEART
         myMessage *msg = malloc(sizeof(myMessage));
         msg->type =1;
-        printf("in myRead() we read an HeartBeat message\n");
         return msg;
         //break;
     }
     else if (mtype == 2){ //ACKNUM
          status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
-         printf("in myRead() we read an ackNum message\n");
         if(status <=0){
             return NULL;
         }
@@ -173,7 +168,6 @@ myMessage * myRead(int socket){
         msg->type =2;
         msg->ackNum =mackNum;
         msg->seqNum = mseqNum;
-        printf("in myRead() we read an ackNum message was actually read\n");
         return msg;
         //break;
         
@@ -181,7 +175,6 @@ myMessage * myRead(int socket){
     else if(mtype == 3){ //CONNECT
         status = byteStream(socket, (char*) &newSesh, sizeof(uint32_t), 0);
         status = byteStream(socket, (char*) &lastReceivedMessage, sizeof(uint32_t), 0);
-        printf("in myRead() we read an Connection message\n");
         if(status < 0){
             printf("problem reading connection string\n");
         }
@@ -194,14 +187,12 @@ myMessage * myRead(int socket){
         msg->type = 3;
         msg->newSesh = mnewSesh;
         msg->lastReceivedMessage = mlastmsg;
-        //printf("A connection message was read\n");
-        printf("in myRead() we read a connection message was actually read\n");
+        printf("A connection message was read\n");
         return msg;
         //break;
     }
     else if(mtype == 4){ //DATA
         status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
-        printf("in myRead() we read a data message\n");
         if(status <=0){
             return NULL;
         }
@@ -236,7 +227,7 @@ myMessage * myRead(int socket){
         msg->ackNum = mackNum;
         msg->payload = calloc(mMsgSize, sizeof(char));
         memcpy(msg->payload, payload, mMsgSize);  //there might be an issue with this 
-        printf("in myRead() we read a data message actually read\n");
+        
         return msg;
        // break;
     }
@@ -247,7 +238,7 @@ myMessage * myRead(int socket){
     }
     else{
         //sorry somethings gone wrong
-        printf("*****The msg received has an unknown type\n");
+        printf("The msg received has an unknown type\n");
         return NULL;
             //break;
     }
@@ -391,7 +382,7 @@ int main(int argc, char * argv[]){
               printf("Cant create connection to client\n");
             }  else if(connectionClient == 0){
                 //not super sure
-                printf("ConnectionClient == 0 \n ");
+                printf("ConnectionClient == 0\n ");
                 } else{
                     //NOOOOW we wanna open sproxy
                     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
@@ -442,9 +433,8 @@ int main(int argc, char * argv[]){
             struct timeval TO;  //time ouuuuuuut
             TO.tv_usec = 0;
             TO.tv_sec = 1;
-            bzero(buffer, 1024);
-            printf("while loop top\n");
-           
+
+            bzero(buffy, MAX_LINE);
             //set the options for set
             FD_ZERO(&socketIncoming);
             
@@ -522,12 +512,10 @@ int main(int argc, char * argv[]){
              int ttype = msgr->type;
              
              if(ttype == 1){  //HEARTBEAT
-             printf("MSGTYPE: Heart Beat\n");
                  gettimeofday(&lastHBreceived, NULL);
                  //break;
              }
              else if(ttype == 2){ //ACKNUM
-             printf("MSGTYPE: Ack Num\n");
                  myMessage *ackS = malloc(sizeof(myMessage)); 
                   ackS-> type = 2; //ack type
                   int msq = msgr->seqNum;
@@ -541,18 +529,17 @@ int main(int argc, char * argv[]){
                   
              }
              else if(ttype == 3){  //CONNECTION
-             printf("MSGTYPE: Connection Message\n");
+             
                  if(msgr->newSesh == 1) {
                     lastMsg = msgr->lastReceivedMessage;
                     printf("Last received message starting = %d\n", lastMsg);
                 } else {
                     //idk. we're losing messages somehow
                 }
-                
+                // break;
                      
             }
              else if(ttype == 4){  //DATA RECV
-             printf("MSGTYPE: Data Message\n");
               int msq = msgr->seqNum;
               printf("Message received. Sequence Number = %d\n",msq);
               
@@ -564,7 +551,6 @@ int main(int argc, char * argv[]){
                   ackS-> ackNum = currSeq;
                   mySend(serverSocket, ackS);
                   //ack sent
-                  printf("--about to foward data from message received\n");
                   send(connectionClient, msgr->payload, msgr->messageSize, 0);
                     lastMsg++;
               }else{
@@ -596,14 +582,13 @@ int main(int argc, char * argv[]){
                      
                      
             //other option, client is where data is coming in from
-        if((connectionClient >= 0) && FD_ISSET(connectionClient, &socketIncoming)){
-            
+        if(FD_ISSET(connectionClient, &socketIncoming) && (connectionClient >= 0)){
+            memset(buffer, 0, 1024);
             lengthPayload = recv(connectionClient, buffer, 1024, 0);
             printf("Data read from client: %s\n", buffer);
             if(lengthPayload <= 0){
-              //its over
-              printf("length of the payload was 0\n ** closing\n");
-               break;
+            //its over
+             break;
             }//close error if
                          
              if(strcmp("exit", buffer) ==0){
@@ -618,8 +603,6 @@ int main(int argc, char * argv[]){
             msgg-> messageSize = lengthPayload;
             msgg->payload = calloc(lengthPayload, sizeof(char));
             memcpy(msgg->payload, buffer, lengthPayload);
-            printf("could be a problem here: \n\n");
-            printf("what we read from the buffer: %s\n", msgg->payload);
             mySend(serverSocket, msgg);
             currSeq++;
               //send(serverSocket, (void *) buffer, lengthPayload, 0);
