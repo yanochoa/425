@@ -1,7 +1,6 @@
 /*
  Author: Yan Ochoa (No partner)
  CSC 425
-  //server
  Milestone 3
  */
 
