@@ -1,7 +1,8 @@
 /*
  Author: Yan Ochoa (No partner)
  CSC 425
- Milestone 3 yesterday's server
+  * server restart
+ Milestone 3
  */
 
 #include <stdio.h>
@@ -320,7 +321,7 @@ int main(int argc, char * argv[]){
     serverAdress.sin_addr.s_addr = INADDR_ANY;
     serverAdress.sin_family = AF_INET;
     serverAdress.sin_port = htons(sPort);
-    
+    printf("Client-Listening socket created\n");
     //bind and listen
     int sockBind = bind(clientListenSocket, (struct sockaddr*)&serverAdress, sizeof(serverAdress));
     int sockListen = listen(clientListenSocket, 5);
@@ -329,7 +330,7 @@ int main(int argc, char * argv[]){
         printf("bind &listen  failed \n");
     }
     //11111111114
-    
+    printf("Client-Listening bin& listen succeeded\n");
     
     //accept connection
     struct timeval lastHBsent;
@@ -346,7 +347,7 @@ int main(int argc, char * argv[]){
     int maxIncoming; //(telnetSocket < cproxy) ? cproxy : telnetSocket;
     
     //alright lets do the listening and foward now
-    //**********************************************************
+    
     while(1){
         //run forever until the input is invalid
         struct timeval TO;
@@ -424,9 +425,10 @@ int main(int argc, char * argv[]){
             
             //the client listening socket has a message
             if(FD_ISSET(clientListenSocket, &incomingSocket)){
+                printf("about to accept a socket\n");
                 cproxy = accept(clientListenSocket, (struct sockaddr *)&serverAdress, &length);
             if(cproxy < 0){
-                fprintf(stderr, "Error: clientListenAcceptSocket accept failed\n");
+                printf("Error: clientListenAcceptSocket accept failed\n");
                 tareItDown();
                 break;
                 //printf("connection to cproxy failed to be established\n");
@@ -435,6 +437,7 @@ int main(int argc, char * argv[]){
                 break;
             }else{
                 if(telnetSocket < 0){
+                    printf("telnetSocket < 0");
                     int telStatus = setUpTelnet();
                     
                     //notify of new connection
@@ -560,22 +563,7 @@ int main(int argc, char * argv[]){
             
     
 
-        } // close if(FD_ISSET(cproxy, &incomingSocket)) 
-                /*
-                //CLIENT WINS
-                memset(buffer, 0, 1024);
-                lengthPayload = recv(cproxy, buffer, 1024,0);
-                printf("Data received from Client %s\n", buffer);
-                
-                if(lengthPayload <= 0){
-                    break;
-                }
-                if(strcmp("exit", buffer) == 0){
-                    break;
-                }
-                send(telnetSocket, (void *) buffer, lengthPayload, 0);
-                memset(buffer, 0, lengthPayload);
-                 */
+        } 
             
     } // close rvVal else
         
