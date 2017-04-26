@@ -357,6 +357,7 @@ int main(int argc, char * argv[]){
     
     while(1){
         //run forever until the input is invalid
+        bzero(buffer, 1024);
         struct timeval TO;
         TO.tv_sec = 1;
         TO.tv_usec = 0;
@@ -365,6 +366,7 @@ int main(int argc, char * argv[]){
         FD_ZERO(&incomingSocket);
         if(telnetSocket > 0){
           FD_SET(telnetSocket, &incomingSocket);
+          printf("telnetSocket > 0 we're setting maxIncoming to it\n");
           maxIncoming = telnetSocket;
         }
         else{
@@ -447,7 +449,7 @@ int main(int argc, char * argv[]){
                 break;
             }else{
                 if(telnetSocket < 0){
-                    printf("telnetSocket < 0");
+                    printf("telnetSocket < 0 calling setUpTelnet()\n");
                     int telStatus = setUpTelnet();
                     
                     //notify of new connection
@@ -481,7 +483,7 @@ int main(int argc, char * argv[]){
             
             if(FD_ISSET(telnetSocket, &incomingSocket)){
                 //DAEMON WINS
-                memset(buffer, 0, 1024);
+                
                 lengthPayload = recv(telnetSocket, buffer, 1024,0);
                 printf("Data received from Telnet %s\n", buffer);
                 if(lengthPayload <= 0){
@@ -517,7 +519,7 @@ int main(int argc, char * argv[]){
                  //}
                  close(cproxy);
                  cproxy =-1;
-                 printf("Current cProxy connection ahs been shut down\n");
+                 printf("Current cProxy connection has been shut down\n");
                  continue;
                 }
                 
