@@ -1,6 +1,7 @@
 /*
 .Author: Yan Ochoa (No partner)
  CSC 425 Milestone 2
+  * //verison a
  client proxy
  */
 
@@ -68,9 +69,12 @@ int byteStream(int socket, char *buff, int size, int incore) {
 }
 
 
-void mySend(int sock, myMessage *message) {
+void mySend(int socket, myMessage *message) {
     
-    
+     if(!message) {
+        printf("mySend() is being asked to send a NULL msg on socket %d\n", socket);
+        return;
+    }
     //alright, we first send a header
     //socket complains if ints arent unsigned so we gotta use uint32_t
     uint32_t flaggy = htonl((uint32_t) message->type);
@@ -83,8 +87,7 @@ void mySend(int sock, myMessage *message) {
     //decide whattttt youre trying to send with some ifs
 
     if(mtype == 1){ //HEARTBEAT
-        //no body
-        //break;
+        //nothing to do here
     }
     else if(mtype == 2){  //ACK NUM
         //socket doesnt like it if you dont send unsigned ints
@@ -139,19 +142,22 @@ myMessage * myRead(int socket){
     int mtype = 0;
     uint32_t mmtype;
     status = byteStream(socket, (char *) &mmtype, sizeof(uint32_t), 0);
-    mtype = ntohl(mmtype);
-    
+    mtype = ntohl(mmtype); 
+    printf("Read a message with type %d", mtype);
     if(status == 0){
+        printf("myRead failed instantly\n");
         return NULL;
     }
     if(mtype == 1){ //HEART
         myMessage *msg = malloc(sizeof(myMessage));
         msg->type =1;
+        printf("in myRead() we read an HeartBeat message\n");
         return msg;
         //break;
     }
     else if (mtype == 2){ //ACKNUM
          status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
+         printf("in myRead() we read an ackNum message\n");
         if(status <=0){
             return NULL;
         }
@@ -167,6 +173,7 @@ myMessage * myRead(int socket){
         msg->type =2;
         msg->ackNum =mackNum;
         msg->seqNum = mseqNum;
+        printf("in myRead() we read an ackNum message was actually read\n");
         return msg;
         //break;
         
@@ -174,6 +181,7 @@ myMessage * myRead(int socket){
     else if(mtype == 3){ //CONNECT
         status = byteStream(socket, (char*) &newSesh, sizeof(uint32_t), 0);
         status = byteStream(socket, (char*) &lastReceivedMessage, sizeof(uint32_t), 0);
+        printf("in myRead() we read an Connection message\n");
         if(status < 0){
             printf("problem reading connection string\n");
         }
@@ -186,12 +194,14 @@ myMessage * myRead(int socket){
         msg->type = 3;
         msg->newSesh = mnewSesh;
         msg->lastReceivedMessage = mlastmsg;
-        printf("A connection message was read\n");
+        //printf("A connection message was read\n");
+        printf("in myRead() we read a connection message was actually read\n");
         return msg;
         //break;
     }
     else if(mtype == 4){ //DATA
         status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
+        printf("in myRead() we read a data message\n");
         if(status <=0){
             return NULL;
         }
@@ -226,7 +236,7 @@ myMessage * myRead(int socket){
         msg->ackNum = mackNum;
         msg->payload = calloc(mMsgSize, sizeof(char));
         memcpy(msg->payload, payload, mMsgSize);  //there might be an issue with this 
-        
+        printf("in myRead() we read a data message actually read\n");
         return msg;
        // break;
     }
@@ -237,7 +247,7 @@ myMessage * myRead(int socket){
     }
     else{
         //sorry somethings gone wrong
-        printf("The msg received has an unknown type\n");
+        printf("*****The msg received has an unknown type\n");
         return NULL;
             //break;
     }
