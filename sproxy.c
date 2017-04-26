@@ -1,6 +1,7 @@
 /*
  Author: Yan Ochoa (No partner)
  CSC 425
+  //server
  Milestone 3
  */
 
@@ -68,7 +69,7 @@ int byteStream(int socket, char *buff, int size, int incore) {
 }
 
 
-void mySend(int socket, myMessage *message) {
+void mySend(int sock, myMessage *message) {
     
     
     //alright, we first send a header
@@ -237,7 +238,7 @@ myMessage * myRead(int socket){
     }
     else{
         //sorry somethings gone wrong
-        printf("**The msg received has an unknown type\n");
+        printf("The msg received has an unknown type\n");
         return NULL;
             //break;
     }
