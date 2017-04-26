@@ -381,7 +381,7 @@ int main(int argc, char * argv[]){
               printf("Cant create connection to client\n");
             }  else if(connectionClient == 0){
                 //not super sure
-                printf("ConnectionClient == 0\n ");
+                printf("ConnectionClient == 0 \n ");
                 } else{
                     //NOOOOW we wanna open sproxy
                     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
@@ -432,8 +432,9 @@ int main(int argc, char * argv[]){
             struct timeval TO;  //time ouuuuuuut
             TO.tv_usec = 0;
             TO.tv_sec = 1;
-
-            bzero(buffy, MAX_LINE);
+            bzero(buffer, 1024);
+            printf("while loop top\n");
+           
             //set the options for set
             FD_ZERO(&socketIncoming);
             
@@ -511,10 +512,12 @@ int main(int argc, char * argv[]){
              int ttype = msgr->type;
              
              if(ttype == 1){  //HEARTBEAT
+             printf("MSGTYPE: Heart Beat\n");
                  gettimeofday(&lastHBreceived, NULL);
                  //break;
              }
              else if(ttype == 2){ //ACKNUM
+             printf("MSGTYPE: Ack Num\n");
                  myMessage *ackS = malloc(sizeof(myMessage)); 
                   ackS-> type = 2; //ack type
                   int msq = msgr->seqNum;
@@ -528,17 +531,18 @@ int main(int argc, char * argv[]){
                   
              }
              else if(ttype == 3){  //CONNECTION
-             
+             printf("MSGTYPE: Connection Message\n");
                  if(msgr->newSesh == 1) {
                     lastMsg = msgr->lastReceivedMessage;
                     printf("Last received message starting = %d\n", lastMsg);
                 } else {
                     //idk. we're losing messages somehow
                 }
-                // break;
+                
                      
             }
              else if(ttype == 4){  //DATA RECV
+             printf("MSGTYPE: Data Message\n");
               int msq = msgr->seqNum;
               printf("Message received. Sequence Number = %d\n",msq);
               
@@ -550,6 +554,7 @@ int main(int argc, char * argv[]){
                   ackS-> ackNum = currSeq;
                   mySend(serverSocket, ackS);
                   //ack sent
+                  printf("--about to foward data from message received\n")
                   send(connectionClient, msgr->payload, msgr->messageSize, 0);
                     lastMsg++;
               }else{
@@ -581,13 +586,14 @@ int main(int argc, char * argv[]){
                      
                      
             //other option, client is where data is coming in from
-        if(FD_ISSET(connectionClient, &socketIncoming) && (connectionClient >= 0)){
-            memset(buffer, 0, 1024);
+        if((connectionClient >= 0) && FD_ISSET(connectionClient, &socketIncoming)){
+            
             lengthPayload = recv(connectionClient, buffer, 1024, 0);
             printf("Data read from client: %s\n", buffer);
             if(lengthPayload <= 0){
-            //its over
-             break;
+              //its over
+              printf("length of the payload was 0\n ** closing\n");
+               break;
             }//close error if
                          
              if(strcmp("exit", buffer) ==0){
@@ -602,6 +608,8 @@ int main(int argc, char * argv[]){
             msgg-> messageSize = lengthPayload;
             msgg->payload = calloc(lengthPayload, sizeof(char));
             memcpy(msgg->payload, buffer, lengthPayload);
+            printf("could be a problem here: \n\n");
+            printf("what we read from the buffer: %s\n", msg->payload);
             mySend(serverSocket, msgg);
             currSeq++;
               //send(serverSocket, (void *) buffer, lengthPayload, 0);
