@@ -69,7 +69,7 @@ int byteStream(int socket, char *buff, int size, int incore) {
 }
 
 
-void mySend(int sock, myMessage *message) {
+void mySend(int socket, myMessage *message) {
     
     
     //alright, we first send a header
@@ -353,7 +353,7 @@ int main(int argc, char * argv[]){
         struct timeval TO;
         TO.tv_sec = 1;
         TO.tv_usec = 0;
-
+	printf("top of while\n");
         
         FD_ZERO(&incomingSocket);
         if(telnetSocket > 0){
@@ -367,10 +367,12 @@ int main(int argc, char * argv[]){
         if(cproxy >0){
             FD_SET(cproxy, &incomingSocket);
             maxIncoming = (maxIncoming < cproxy) ? cproxy : maxIncoming;
+	printf("cproxy was >0\n");
         }else{
             FD_SET(clientListenSocket, &incomingSocket);
              maxIncoming = (maxIncoming < clientListenSocket) ? clientListenSocket : maxIncoming;
-        }
+        	printf("cproxy was not >0\n");
+	}
         
         
         
@@ -385,6 +387,7 @@ int main(int argc, char * argv[]){
             tareItDown();
         }
         else if(rvVal == 0){
+		
             // I think we got a timeout counter to increase
              //WE GOT A TIMEOUT PEOPLE
             //send the server a hb
