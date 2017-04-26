@@ -88,6 +88,7 @@ void mySend(int socket, myMessage *message) {
         //break;
     }
     else if(mtype == 2){  //ACK NUM
+     printf("We're in mySend() about to send an ack\n");
         //socket doesnt like it if you dont send unsigned ints
         uint32_t macknum      = htonl((uint32_t) message->ackNum);
         uint32_t msequenceNum = htonl((uint32_t) message->seqNum);
@@ -97,6 +98,7 @@ void mySend(int socket, myMessage *message) {
         
     }
     else if(mtype == 3){  //CONNECT
+    printf("We're in mySend() about to send a connect\n");
     
         uint32_t mnewSesh             = htonl((uint32_t) message->newSesh);
         uint32_t mlastReceivedMessage = htonl((uint32_t) message->lastReceivedMessage);
@@ -106,6 +108,7 @@ void mySend(int socket, myMessage *message) {
         
     }
     else if(mtype == 4){  //DATA
+    printf("We're in mySend() about to send data\n");
         //the big boy
         uint32_t macknum      = htonl((uint32_t) message->ackNum);
         uint32_t msequenceNum = htonl((uint32_t) message->seqNum);
@@ -146,12 +149,14 @@ myMessage * myRead(int socket){
         return NULL;
     }
     if(mtype == 1){ //HEART
+    printf("We're in myRead() about to read a heart beat\n");
         myMessage *msg = malloc(sizeof(myMessage));
         msg->type =1;
         return msg;
         //break;
     }
     else if (mtype == 2){ //ACKNUM
+    printf("We're in myRead() about to read an ack\n");
          status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
         if(status <=0){
             return NULL;
@@ -173,6 +178,7 @@ myMessage * myRead(int socket){
         
     }
     else if(mtype == 3){ //CONNECT
+    printf("We're in myRead() about to read a connection str\n");
         status = byteStream(socket, (char*) &newSesh, sizeof(uint32_t), 0);
         status = byteStream(socket, (char*) &lastReceivedMessage, sizeof(uint32_t), 0);
         if(status < 0){
@@ -192,6 +198,7 @@ myMessage * myRead(int socket){
         //break;
     }
     else if(mtype == 4){ //DATA
+    printf("We're in myRead() about to read data\n");
         status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
         if(status <=0){
             return NULL;
@@ -251,7 +258,7 @@ myMessage * myRead(int socket){
     
     
 void tareItDown(){
-    printf("taring it all down\n");
+    printf("tearing it all down\n");
     close(clientListenSocket);
     close(cproxy);
     close(telnetSocket);
@@ -353,7 +360,7 @@ int main(int argc, char * argv[]){
         struct timeval TO;
         TO.tv_sec = 1;
         TO.tv_usec = 0;
-	printf("top of while\n");
+	//printf("top of while\n");
         
         FD_ZERO(&incomingSocket);
         if(telnetSocket > 0){
@@ -513,9 +520,12 @@ int main(int argc, char * argv[]){
                  printf("Current cProxy connection ahs been shut down\n");
                  continue;
                 }
+                
+                
+                
              //figure out what type of message came in, now that we know its not null:
              int ttype = msgr->type;
-             
+             printf("the current cProxy message was of type %d \n\n", ttype);
              if(ttype == 1){  //HEARTBEAT
                  gettimeofday(&lastHBreceived, NULL);
                  //break;
