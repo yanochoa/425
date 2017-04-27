@@ -2,6 +2,7 @@
 .Author: Yan Ochoa (No partner)
  CSC 425 Milestone 2
  client proxy restart
+ this a recovered version after an update that broke it
  */
 
 #include <stdio.h>
@@ -251,12 +252,12 @@ int failSwitch(char * s_host, int sport){
     close(serverSocket);
     serverSocket = -1;
     printf("Disconnect Occurred\n");
-    printf("\nRe-connect protocol attempting to reconnect\n");
+    printf("Re-connect protocol initiated\n");
     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
     serverConnection = -1;
-    //printf("new server socket created\n");
+    printf("new server socket created\n");
     struct hostent *hostess = gethostbyname(s_host);
     
     struct sockaddr_in cAdd;
@@ -268,7 +269,7 @@ int failSwitch(char * s_host, int sport){
     
      serverConnection = connect(serverSocket, (struct sockaddr *) &cAdd, sizeof(cAdd));
      if(serverConnection < 0){
-         //printf("Trouble in failSwitch, couldnt open new serverConnection\n");
+         printf("Trouble in failSwitch, couldnt open new serverConnection\n");
          return -1;
      }
      //notify mailbox
@@ -277,7 +278,7 @@ int failSwitch(char * s_host, int sport){
      newConMsg ->newSesh = 0;
      newConMsg ->lastReceivedMessage = lastMsg;
      mySend(serverSocket, newConMsg);
-     printf("\n*re-connect protocol succeeded.\n");
+     printf("re-connect protocol succeeded.\n");
      return 0;
 }
 
@@ -364,7 +365,7 @@ int main(int argc, char * argv[]){
            if((bind_ < 0) || (listen_ < 0)){
            printf("bind and listen failed\n");
            }
-           printf("waiting for a telnet connection\n");
+           printf("waiting for a client here\n");
            connectionClient = accept(clientListenSocket,(struct sockaddr *)&listenAdress, &len_sock);
             if(connectionClient < 0){
               printf("Cant create connection to client\n");
@@ -387,7 +388,7 @@ int main(int argc, char * argv[]){
                     if(!specifiedHost){
                         printf("The Host IP is not online\n");
                     }
-         printf("Ready to connect\n");      
+         printf("ready to connect\n");      
                
          bcopy(specifiedHost->h_addr, (char *)&clientAdress.sin_addr, specifiedHost->h_length);
          clientAdress.sin_port = htons(sport); //passed in as arg[3]
