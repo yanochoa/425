@@ -492,12 +492,20 @@ int main(int argc, char * argv[]){
             //lengthPayload= recv(serverSocket, buffer, 1024, 0);
              myMessage *msgr = myRead(serverSocket); 
              if(!msgr){
-                 printf("message recieved null..\n");
-                 int state1 =failSwitch(s_host, sport);
-                 if(state1 != 0){
-                     printf("problem reconnecting line 485\n");
+		int out =0 ;
+                 //printf("message recieved null..\n");
+                while(out == 0){ 
+		int state1 =failSwitch(s_host, sport);
+                 	if(state1 != 0){
+                     	printf("New IP has not been aquired yet..\n");
+                 	}
+			else{
+				out =1;
+			}
+		
                  }
-                 continue;
+		printf("RECONNECTED\n\n");
+		continue;
              }
              //figure out what type of message came in, now that we know its not null:
              int ttype = msgr->type;
