@@ -349,7 +349,7 @@ int main(int argc, char * argv[]){
     
     
     
-    
+    int breaker = 0;
     
     int maxIncoming; //(telnetSocket < cproxy) ? cproxy : telnetSocket;
     
@@ -376,12 +376,17 @@ int main(int argc, char * argv[]){
         if(cproxy >0){
             FD_SET(cproxy, &incomingSocket);
             maxIncoming = (maxIncoming < cproxy) ? cproxy : maxIncoming;
-	printf("cproxy was >0\n");
+	printf("cproxy WAS > 0\n");
         }else{
             FD_SET(clientListenSocket, &incomingSocket);
              maxIncoming = (maxIncoming < clientListenSocket) ? clientListenSocket : maxIncoming;
-        	printf("cproxy was not >0\n");
-	}
+        	if(breaker % 7 ==0){
+                printf("cproxy was not > 0\n");
+                breaker =0;
+            }
+            
+            }
+            breaker++;
         
         
         

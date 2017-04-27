@@ -461,8 +461,8 @@ int main(int argc, char * argv[]){
                 mySend(serverSocket, HBmsg);
                 
                 //check if we've REALLY timed out
-                int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
-                if(differenceinHBs >= 3){
+                //int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
+                if(lastHBsent.tv_sec - lastHBreceived.tv_sec >= 3){
                     printf("Timeout Occurred/n");
                     int state =failSwitch(s_host, sport);
                     if(state != 0){
@@ -476,6 +476,7 @@ int main(int argc, char * argv[]){
     else{
          //select a path
          //but before that, send HB
+         printf("we went to the big else\n");
          struct timeval HBnow;
          gettimeofday(&HBnow, NULL);
          int diff =  HBnow.tv_sec - lastHBsent.tv_sec;
