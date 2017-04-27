@@ -34,6 +34,7 @@ typedef struct{
 
     int sPort;
     int dummy = 1;
+    int printingVar =1;
     int dummy2 = -1;
     int rvVal;
     int lengthPayload = -1;
@@ -88,7 +89,7 @@ void mySend(int socket, myMessage *message) {
         //break;
     }
     else if(mtype == 2){  //ACK NUM
-     printf("We're in mySend() about to send an ack\n");
+     printf("We are sending an Ack to client\n");
         //socket doesnt like it if you dont send unsigned ints
         uint32_t macknum      = htonl((uint32_t) message->ackNum);
         uint32_t msequenceNum = htonl((uint32_t) message->seqNum);
@@ -98,7 +99,7 @@ void mySend(int socket, myMessage *message) {
         
     }
     else if(mtype == 3){  //CONNECT
-    printf("We're in mySend() about to send a connect\n");
+    printf("We are sending a new connection message to client\n");
     
         uint32_t mnewSesh             = htonl((uint32_t) message->newSesh);
         uint32_t mlastReceivedMessage = htonl((uint32_t) message->lastReceivedMessage);
@@ -108,7 +109,7 @@ void mySend(int socket, myMessage *message) {
         
     }
     else if(mtype == 4){  //DATA
-    printf("We're in mySend() about to send data\n");
+    printf("We are sending data message to client\n");
         //the big boy
         uint32_t macknum      = htonl((uint32_t) message->ackNum);
         uint32_t msequenceNum = htonl((uint32_t) message->seqNum);
@@ -334,10 +335,10 @@ int main(int argc, char * argv[]){
     int sockListen = listen(clientListenSocket, 5);
     
     if( (sockBind < 0) || (sockListen < 0) ){
-        printf("bind &listen  failed \n");
+        printf("bind & listen  failed \n");
     }
     //11111111114
-    printf("Client-Listening bin& listen succeeded\n");
+    printf("Client-Listening succeeded\n");
     
     //accept connection
     struct timeval lastHBsent;
@@ -380,8 +381,12 @@ int main(int argc, char * argv[]){
         }else{
             FD_SET(clientListenSocket, &incomingSocket);
              maxIncoming = (maxIncoming < clientListenSocket) ? clientListenSocket : maxIncoming;
-        	printf("cproxy connection is not online\n");
-	}
+        	if(printingVar % 4 == 0){
+              printf("cproxy connection is not online\n");
+              printingVar =0;
+            }
+        }
+        printingVar++;
         
         
         
@@ -412,7 +417,7 @@ int main(int argc, char * argv[]){
                 //check if we've REALLY timed out
                 int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(differenceinHBs >= 3){
-                    printf("Timeout Occurred. connection cProxy has timed out./n");
+                    printf("Timeout Occurred\n");
                     //int state =failSwitch(s_host, sport);
                     close(cproxy);
                     cproxy = -1;
@@ -437,7 +442,7 @@ int main(int argc, char * argv[]){
             
             //the client listening socket has a message
             if(FD_ISSET(clientListenSocket, &incomingSocket)){
-                printf("about to accept a socket\n");
+                printf("about to accept a Connection\n");
                 cproxy = accept(clientListenSocket, (struct sockaddr *)&serverAdress, &length);
             if(cproxy < 0){
                 printf("Error: clientListenAcceptSocket accept failed\n");
