@@ -470,7 +470,7 @@ int main(int argc, char * argv[]){
                     }
                     gettimeofday(&lastHBreceived, NULL);
                     gettimeofday(&lastHBsent, NULL);
-                }
+                } 
             }
          }
     else{
