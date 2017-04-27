@@ -55,14 +55,19 @@ int byteStream(int socket, char *buff, int size, int incore) {
     int working = 1;
     int iterator = 0;
     int debugg =1;
+    if(incore ==1){
+        //printf("Incore was set");
+    }
 
     while((size - stream) > 0) {
         iterator = read(socket, (buff + stream), (size - stream));
         if( iterator <= 0) {
+            working =0;
             return iterator;
         }else {
+            working = 1;
             stream = stream+ iterator;
-            printf("bytestream progress %d bytes (%d total), %d remaining \n", iterator,stream, (size - stream));
+            printf("Bytestream receiving progress %d bytes -- %d total.\n", iterator,stream);
         }
     }
     return stream;
@@ -87,8 +92,7 @@ void mySend(int socket, myMessage *message) {
     //decide whattttt youre trying to send with some ifs
 
     if(mtype == 1){ //HEARTBEAT
-        //no body
-        //break;
+        
     }
     else if(mtype == 2){  //ACK NUM
         //socket doesnt like it if you dont send unsigned ints
@@ -232,18 +236,18 @@ myMessage * myRead(int socket){
         memcpy(msg->payload, payload, mMsgSize);  //there might be an issue with this 
         
         return msg;
-       // break;
+       
     }
     else if(mtype == 99){ //DEBUG TYPE
             printf("The debug message was received\n");
             return NULL;
-            //break;
+     
     }
     else{
         //sorry somethings gone wrong
         printf("The msg received has an unknown type\n");
         return NULL;
-            //break;
+            
     }
     
 }//close myRead()
@@ -251,8 +255,8 @@ myMessage * myRead(int socket){
 int failSwitch(char * s_host, int sport){
     close(serverSocket);
     serverSocket = -1;
-    printf("Disconnect Occurred\n");
-    printf("Re-connect protocol initiated\n");
+    //printf("Disconnect Occurred\n");
+   // printf("Re-connect protocol initiated\n");
     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
@@ -278,7 +282,7 @@ int failSwitch(char * s_host, int sport){
      newConMsg ->newSesh = 0;
      newConMsg ->lastReceivedMessage = lastMsg;
      mySend(serverSocket, newConMsg);
-     printf("re-connect protocol succeeded.\n");
+     //printf("re-connect protocol succeeded.\n");
      return 0;
 }
 
@@ -365,7 +369,7 @@ int main(int argc, char * argv[]){
            if((bind_ < 0) || (listen_ < 0)){
            printf("bind and listen failed\n");
            }
-           printf("waiting for a client here\n");
+           printf("waiting for a Telnet client connection..\n");
            connectionClient = accept(clientListenSocket,(struct sockaddr *)&listenAdress, &len_sock);
             if(connectionClient < 0){
               printf("Cant create connection to client\n");
@@ -388,7 +392,7 @@ int main(int argc, char * argv[]){
                     if(!specifiedHost){
                         printf("The Host IP is not online\n");
                     }
-         printf("ready to connect\n");      
+         printf("Ready to connect\n");      
                
          bcopy(specifiedHost->h_addr, (char *)&clientAdress.sin_addr, specifiedHost->h_length);
          clientAdress.sin_port = htons(sport); //passed in as arg[3]
@@ -476,7 +480,7 @@ int main(int argc, char * argv[]){
     else{
          //select a path
          //but before that, send HB
-         printf("we went to the big else\n");
+        // printf("we went to the big else\n");
          struct timeval HBnow;
          gettimeofday(&HBnow, NULL);
          int diff =  HBnow.tv_sec - lastHBsent.tv_sec;
