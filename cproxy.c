@@ -2,8 +2,7 @@
 .Author: Yan Ochoa (No partner)
  CSC 425 Milestone 2
  client proxy restart
- this a recovered version after an update that broke it
-  version 2
+  * this is me hail marying at 10:11 4/26
  */
 
 #include <stdio.h>
@@ -29,7 +28,6 @@ typedef struct{
     int newSesh;
     int messageSize;
     int seqNum;
-    int timeToBreak =0;
     int inUse;
     int corrupt;
     int ackNum;
@@ -64,7 +62,7 @@ int byteStream(int socket, char *buff, int size, int incore) {
             return iterator;
         }else {
             stream = stream+ iterator;
-            printf("bytestream progress: receiving %d bytes --(%d total) \n", iterator,stream);
+            printf("bytestream progress %d bytes (%d total), %d remaining \n", iterator,stream, (size - stream));
         }
     }
     return stream;
@@ -253,13 +251,13 @@ myMessage * myRead(int socket){
 int failSwitch(char * s_host, int sport){
     close(serverSocket);
     serverSocket = -1;
-    //printf("Disconnect Occurred\n");
-    //printf("Re-connect protocol initiated\n");
+    printf("Disconnect Occurred\n");
+    printf("Re-connect protocol initiated\n");
     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
     serverConnection = -1;
-    //printf("new server socket created\n");
+    printf("new server socket created\n");
     struct hostent *hostess = gethostbyname(s_host);
     
     struct sockaddr_in cAdd;
@@ -320,7 +318,7 @@ int main(int argc, char * argv[]){
     
     fd_set socketIncoming;
     timeValue.tv_sec = 10;
-    timeValue.tv_usec = 45000; //took A ZERO OUUUUUUT
+    timeValue.tv_usec = 450000;
     
     
     
@@ -443,9 +441,7 @@ int main(int argc, char * argv[]){
         
                                              
             receivingValue = select(maxIncoming +1,&socketIncoming, NULL, NULL, &TO);
-               if(timeToBreak == 1){
-                receivingValue == 1;
-               }                              
+                                             
         if(receivingValue == -1){
         //something went wrong
         printf("Something went wrong with the receiving of data\n");
@@ -467,10 +463,8 @@ int main(int argc, char * argv[]){
                 //check if we've REALLY timed out
                 int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(differenceinHBs >= 3){
-                    //printf("Timeout Occurred\n");
-                    
+                    printf("Timeout Occurred/n");
                     int state =failSwitch(s_host, sport);
-                    timeToBreak = 1;
                     if(state != 0){
                         printf("the failSwitch failed\n");
                     }
@@ -499,20 +493,20 @@ int main(int argc, char * argv[]){
             //lengthPayload= recv(serverSocket, buffer, 1024, 0);
              myMessage *msgr = myRead(serverSocket); 
              if(!msgr){
-                int out =0 ;
+		int out =0 ;
                  //printf("message recieved null..\n");
                 while(out == 0){ 
-                    int state1 =failSwitch(s_host, sport);
+		int state1 =failSwitch(s_host, sport);
                  	if(state1 != 0){
                      	printf("New IP has not been aquired yet..\n");
-                        }
-                    else{
-                        out =1;
-                        }
-                 } //close while
-                 //BIG DEAL 
-                    printf("RECONNECTED\n\n");
-                continue;
+                 	}
+			else{
+				out =1;
+			}
+		
+                 }
+		printf("RECONNECTED\n\n");
+		continue;
              }
              //figure out what type of message came in, now that we know its not null:
              int ttype = msgr->type;

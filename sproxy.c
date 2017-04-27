@@ -1,7 +1,7 @@
 /*
  Author: Yan Ochoa (No partner)
  CSC 425
-  * server restart
+  hail mary at 10:11
  Milestone 3
  */
 
@@ -34,7 +34,6 @@ typedef struct{
 
     int sPort;
     int dummy = 1;
-    int printingVar =1;
     int dummy2 = -1;
     int rvVal;
     int lengthPayload = -1;
@@ -63,7 +62,7 @@ int byteStream(int socket, char *buff, int size, int incore) {
             return iterator;
         }else {
             stream = stream+ iterator;
-            printf("bytestream receiving: progress %d bytes -- (%d total)\n", iterator,stream);
+            printf("bytestream progress %d bytes (%d total), %d remaining \n", iterator,stream, (size - stream));
         }
     }
     return stream;
@@ -89,7 +88,7 @@ void mySend(int socket, myMessage *message) {
         //break;
     }
     else if(mtype == 2){  //ACK NUM
-     printf("We are sending an Ack to client\n");
+     printf("We're in mySend() about to send an ack\n");
         //socket doesnt like it if you dont send unsigned ints
         uint32_t macknum      = htonl((uint32_t) message->ackNum);
         uint32_t msequenceNum = htonl((uint32_t) message->seqNum);
@@ -99,7 +98,7 @@ void mySend(int socket, myMessage *message) {
         
     }
     else if(mtype == 3){  //CONNECT
-    printf("We are sending a new connection message to client\n");
+    printf("We're in mySend() about to send a connect\n");
     
         uint32_t mnewSesh             = htonl((uint32_t) message->newSesh);
         uint32_t mlastReceivedMessage = htonl((uint32_t) message->lastReceivedMessage);
@@ -109,7 +108,7 @@ void mySend(int socket, myMessage *message) {
         
     }
     else if(mtype == 4){  //DATA
-    printf("We are sending data message to client\n");
+    printf("We're in mySend() about to send data\n");
         //the big boy
         uint32_t macknum      = htonl((uint32_t) message->ackNum);
         uint32_t msequenceNum = htonl((uint32_t) message->seqNum);
@@ -150,14 +149,14 @@ myMessage * myRead(int socket){
         return NULL;
     }
     if(mtype == 1){ //HEART
-    printf("Server received a HeartBeat message\n");
+    printf("We're in myRead() about to read a heart beat\n");
         myMessage *msg = malloc(sizeof(myMessage));
         msg->type =1;
         return msg;
         //break;
     }
     else if (mtype == 2){ //ACKNUM
-   printf("Server reading an Ack\n");
+    printf("We're in myRead() about to read an ack\n");
          status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
         if(status <=0){
             return NULL;
@@ -179,7 +178,7 @@ myMessage * myRead(int socket){
         
     }
     else if(mtype == 3){ //CONNECT
-    printf("Server reading a new connection str\n");
+    printf("We're in myRead() about to read a connection str\n");
         status = byteStream(socket, (char*) &newSesh, sizeof(uint32_t), 0);
         status = byteStream(socket, (char*) &lastReceivedMessage, sizeof(uint32_t), 0);
         if(status < 0){
@@ -194,12 +193,12 @@ myMessage * myRead(int socket){
         msg->type = 3;
         msg->newSesh = mnewSesh;
         msg->lastReceivedMessage = mlastmsg;
-        
+        printf("A connection message was read\n");
         return msg;
         //break;
     }
     else if(mtype == 4){ //DATA
-    printf("Server reading in data\n");
+    printf("We're in myRead() about to read data\n");
         status = byteStream( socket, (char *) &seqNum, sizeof(uint32_t), 0);
         if(status <=0){
             return NULL;
@@ -224,7 +223,7 @@ myMessage * myRead(int socket){
         status = byteStream(socket, payload, mMsgSize, 0);
         
         if(status <= 0){
-            //printf("No payload in the payload message received/n");
+            printf("No payload in the payload message received/n");
             return NULL;
         }
         
@@ -246,7 +245,7 @@ myMessage * myRead(int socket){
     }
     else{
         //sorry somethings gone wrong
-        //printf("The msg received has an unknown type\n");
+        printf("The msg received has an unknown type\n");
         return NULL;
             //break;
     }
@@ -335,10 +334,10 @@ int main(int argc, char * argv[]){
     int sockListen = listen(clientListenSocket, 5);
     
     if( (sockBind < 0) || (sockListen < 0) ){
-        printf("bind & listen  failed \n");
+        printf("bind &listen  failed \n");
     }
     //11111111114
-    printf("Client-Listening succeeded\n");
+    printf("Client-Listening bin& listen succeeded\n");
     
     //accept connection
     struct timeval lastHBsent;
@@ -377,16 +376,12 @@ int main(int argc, char * argv[]){
         if(cproxy >0){
             FD_SET(cproxy, &incomingSocket);
             maxIncoming = (maxIncoming < cproxy) ? cproxy : maxIncoming;
-	printf("cproxy connection stable\n");
+	printf("cproxy was >0\n");
         }else{
             FD_SET(clientListenSocket, &incomingSocket);
              maxIncoming = (maxIncoming < clientListenSocket) ? clientListenSocket : maxIncoming;
-        	if(printingVar % 4 == 0){
-              printf("cproxy connection is not online\n");
-              printingVar =0;
-            }
-        }
-        printingVar++;
+        	printf("cproxy was not >0\n");
+	}
         
         
         
@@ -417,7 +412,7 @@ int main(int argc, char * argv[]){
                 //check if we've REALLY timed out
                 int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(differenceinHBs >= 3){
-                    printf("Timeout Occurred\n");
+                    printf("Timeout Occurred. connection cProxy has timed out./n");
                     //int state =failSwitch(s_host, sport);
                     close(cproxy);
                     cproxy = -1;
@@ -442,7 +437,7 @@ int main(int argc, char * argv[]){
             
             //the client listening socket has a message
             if(FD_ISSET(clientListenSocket, &incomingSocket)){
-                printf("about to accept a Connection\n");
+                printf("about to accept a socket\n");
                 cproxy = accept(clientListenSocket, (struct sockaddr *)&serverAdress, &length);
             if(cproxy < 0){
                 printf("Error: clientListenAcceptSocket accept failed\n");
@@ -532,7 +527,7 @@ int main(int argc, char * argv[]){
                 
              //figure out what type of message came in, now that we know its not null:
              int ttype = msgr->type;
-             
+             printf("the current cProxy message was of type %d \n\n", ttype);
              if(ttype == 1){  //HEARTBEAT
                  gettimeofday(&lastHBreceived, NULL);
                  //break;
@@ -562,6 +557,7 @@ int main(int argc, char * argv[]){
             
              else if(ttype == 4){  //DATA RECV
               int msq = msgr->seqNum;
+              printf("Message received. Sequence Number = %d\n",msq);
               
               if(lastMsg == msq){
                   //send ack
