@@ -3,6 +3,7 @@
  CSC 425 Milestone 2
  client proxy restart
  this a recovered version after an update that broke it
+  version 2
  */
 
 #include <stdio.h>
@@ -251,13 +252,13 @@ myMessage * myRead(int socket){
 int failSwitch(char * s_host, int sport){
     close(serverSocket);
     serverSocket = -1;
-    printf("Disconnect Occurred\n");
-    printf("Re-connect protocol initiated\n");
+    //printf("Disconnect Occurred\n");
+    //printf("Re-connect protocol initiated\n");
     serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
     serverConnection = -1;
-    printf("new server socket created\n");
+    //printf("new server socket created\n");
     struct hostent *hostess = gethostbyname(s_host);
     
     struct sockaddr_in cAdd;
@@ -318,7 +319,7 @@ int main(int argc, char * argv[]){
     
     fd_set socketIncoming;
     timeValue.tv_sec = 10;
-    timeValue.tv_usec = 450000;
+    timeValue.tv_usec = 45000; //took A ZERO OUUUUUUT
     
     
     
@@ -463,7 +464,7 @@ int main(int argc, char * argv[]){
                 //check if we've REALLY timed out
                 int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(differenceinHBs >= 3){
-                    printf("Timeout Occurred/n");
+                    //printf("Timeout Occurred\n");
                     int state =failSwitch(s_host, sport);
                     if(state != 0){
                         printf("the failSwitch failed\n");
