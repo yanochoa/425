@@ -29,6 +29,7 @@ typedef struct{
     int newSesh;
     int messageSize;
     int seqNum;
+    int timeToBreak =0;
     int inUse;
     int corrupt;
     int ackNum;
@@ -442,7 +443,9 @@ int main(int argc, char * argv[]){
         
                                              
             receivingValue = select(maxIncoming +1,&socketIncoming, NULL, NULL, &TO);
-                                             
+               if(timeToBreak == 1){
+                receivingValue == 1;
+               }                              
         if(receivingValue == -1){
         //something went wrong
         printf("Something went wrong with the receiving of data\n");
@@ -465,7 +468,9 @@ int main(int argc, char * argv[]){
                 int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(differenceinHBs >= 3){
                     //printf("Timeout Occurred\n");
+                    
                     int state =failSwitch(s_host, sport);
+                    timeToBreak = 1;
                     if(state != 0){
                         printf("the failSwitch failed\n");
                     }
