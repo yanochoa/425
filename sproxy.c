@@ -382,7 +382,7 @@ int main(int argc, char * argv[]){
             FD_SET(clientListenSocket, &incomingSocket);
              maxIncoming = (maxIncoming < clientListenSocket) ? clientListenSocket : maxIncoming;
         	if(breaker % 7 ==0){
-                printf("Connection to Cproxy is not currently online, please wait\n");
+                printf("Connection to Cproxy is not currently online, Waiting for Reconnection.\n");
                 breaker =0;
             }
             
@@ -418,7 +418,8 @@ int main(int argc, char * argv[]){
                 //check if we've REALLY timed out
                 int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(differenceinHBs >= 3){
-                    printf("Timeout Occurred. connection cProxy has timed out./n");
+                    printf("Timeout Occurred. connection cProxy has timed out.\n");
+                    printf("Other connection being kept alive while we wait\n");
                     //int state =failSwitch(s_host, sport);
                     close(cproxy);
                     cproxy = -1;
@@ -443,7 +444,7 @@ int main(int argc, char * argv[]){
             
             //the client listening socket has a message
             if(FD_ISSET(clientListenSocket, &incomingSocket)){
-                printf("about to accept a socket\n");
+                printf("About to accept a new Cproxy connection\n");
                 cproxy = accept(clientListenSocket, (struct sockaddr *)&serverAdress, &length);
             if(cproxy < 0){
                 printf("Error: clientListenAcceptSocket accept failed\n");

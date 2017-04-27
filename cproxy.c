@@ -223,7 +223,7 @@ myMessage * myRead(int socket){
         status = byteStream(socket, payload, mMsgSize, 0);
         
         if(status <= 0){
-            printf("No payload in the payload message received/n");
+            printf("No payload in the payload message received\n");
             return NULL;
         }
         
@@ -245,7 +245,7 @@ myMessage * myRead(int socket){
     }
     else{
         //sorry somethings gone wrong
-        printf("The msg received has an unknown type\n");
+       // printf("The msg received has an unknown type\n");
         return NULL;
             
     }
@@ -261,7 +261,7 @@ int failSwitch(char * s_host, int sport){
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &dummy, sizeof(int));
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEPORT, &dummy, sizeof(int));
     serverConnection = -1;
-    printf("new server socket created\n");
+    //printf("new server socket created\n");
     struct hostent *hostess = gethostbyname(s_host);
     
     struct sockaddr_in cAdd;
@@ -273,7 +273,7 @@ int failSwitch(char * s_host, int sport){
     
      serverConnection = connect(serverSocket, (struct sockaddr *) &cAdd, sizeof(cAdd));
      if(serverConnection < 0){
-         printf("Trouble in failSwitch, couldnt open new serverConnection\n");
+         //printf("Trouble in failSwitch, couldnt open new server Connection\n");
          return -1;
      }
      //notify mailbox
@@ -510,7 +510,7 @@ int main(int argc, char * argv[]){
 			}
 		
                  }
-		printf("RECONNECTED\n\n");
+		printf("Connection stable\n");
 		continue;
              }
              //figure out what type of message came in, now that we know its not null:
@@ -594,7 +594,7 @@ int main(int argc, char * argv[]){
         if((connectionClient >= 0) && FD_ISSET(connectionClient, &socketIncoming)){
             
             lengthPayload = recv(connectionClient, buffer, 1024, 0);
-            printf("Data read from client: %s\n", buffer);
+            printf("Data read from client: %s", buffer);
             if(lengthPayload <= 0){
               //its over
               printf("length of the payload was 0\n ** closing\n");
@@ -614,7 +614,7 @@ int main(int argc, char * argv[]){
             msgg->payload = calloc(lengthPayload, sizeof(char));
             memcpy(msgg->payload, buffer, lengthPayload);
             //printf("could be a problem here: \n\n");
-            printf("what we read from the buffer: %s\n", msgg->payload);
+            printf("what we read from the buffer: %s", msgg->payload);
             mySend(serverSocket, msgg);
             currSeq++;
               //send(serverSocket, (void *) buffer, lengthPayload, 0);
