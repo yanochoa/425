@@ -61,7 +61,7 @@ int byteStream(int socket, char *buff, int size, int incore) {
             return iterator;
         }else {
             stream = stream+ iterator;
-            printf("bytestream progress %d bytes (%d total), %d remaining \n", iterator,stream, (size - stream));
+            printf("bytestream progress: receiving %d bytes --(%d total) \n", iterator,stream);
         }
     }
     return stream;
@@ -492,20 +492,20 @@ int main(int argc, char * argv[]){
             //lengthPayload= recv(serverSocket, buffer, 1024, 0);
              myMessage *msgr = myRead(serverSocket); 
              if(!msgr){
-		int out =0 ;
+                int out =0 ;
                  //printf("message recieved null..\n");
                 while(out == 0){ 
-		int state1 =failSwitch(s_host, sport);
+                    int state1 =failSwitch(s_host, sport);
                  	if(state1 != 0){
                      	printf("New IP has not been aquired yet..\n");
-                 	}
-			else{
-				out =1;
-			}
-		
-                 }
-		printf("RECONNECTED\n\n");
-		continue;
+                        }
+                    else{
+                        out =1;
+                        }
+                 } //close while
+                 //BIG DEAL 
+                    printf("RECONNECTED\n\n");
+                continue;
              }
              //figure out what type of message came in, now that we know its not null:
              int ttype = msgr->type;
