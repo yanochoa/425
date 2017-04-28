@@ -1,14 +1,12 @@
 #YanOchoa
-#PHASE2 NETWORKS425
+#PHASE3 NETWORKS425
 .PHONY: all clean
 
-all: cproxy sproxy
-
-cproxy: cproxy.o
-	gcc -Wall -g -o $@ $^
+all: sproxy cproxy
 
 sproxy: sproxy.o
 	gcc -Wall -g -o $@ $^
-
+cproxy: cproxy.o
+	gcc -Wall -g -o $@ $^
 clean:
-	rm *.o cproxy sproxy
+	rm *.o sproxy cproxy
