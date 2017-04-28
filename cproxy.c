@@ -1,8 +1,8 @@
 /*
 .Author: Yan Ochoa (No partner)
- CSC 425 Milestone 2
- client proxy restart
-  * this is me hail marying at 10:11 4/26
+ CSC 425 Milestone 3
+ client proxy 
+  * Final Version
  */
 
 #include <stdio.h>
