@@ -22,8 +22,9 @@
 #define CONNECT   3
 #define DATA      4
 
+//the struct that holds the message together
 typedef struct{
-    uint32_t type; //type of the message, look for macros values
+    uint32_t type; 
     int lastReceivedMessage;
     int newSesh;
     int messageSize;
@@ -427,10 +428,11 @@ int main(int argc, char * argv[]){
         while(1){
             struct timeval TO;  //time ouuuuuuut
             TO.tv_usec = 0;
+            int incore2 =0;
             TO.tv_sec = 1;
             bzero(buffer, 1024);
             //printf("while loop top\n");
-           
+            //if(incore2 )
             //set the options for set
             FD_ZERO(&socketIncoming);
             
@@ -467,10 +469,10 @@ int main(int argc, char * argv[]){
                 //check if we've REALLY timed out
                 //int differenceinHBs = lastHBsent.tv_sec - lastHBreceived.tv_sec;
                 if(lastHBsent.tv_sec - lastHBreceived.tv_sec >= 3){
-                    printf("Timeout Occurred/n");
+                    printf("Timeout Occurred\n");
                     int state =failSwitch(s_host, sport);
                     if(state != 0){
-                        printf("the failSwitch failed\n");
+                       // printf("the failSwitch failed\n");
                     }
                     gettimeofday(&lastHBreceived, NULL);
                     gettimeofday(&lastHBsent, NULL);
@@ -602,6 +604,10 @@ int main(int argc, char * argv[]){
             }//close error if
                          
              if(strcmp("exit", buffer) ==0){
+              printf("Closing connection \n");
+              goto DONE;
+              }
+              if(strcmp("quit", buffer) ==0){
               printf("Closing connection \n");
               goto DONE;
               }
